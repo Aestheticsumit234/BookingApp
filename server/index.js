@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 import express from "express";
 import connectDB from "./DB/connectDB.js";
 import authRoutes from "./routes/auth.routes.js";
+import bookingRoutes from "./routes/booking.routes.js";
+import eventsRoutes from "./routes/event.routes.js";
 
 dotenv.config();
 
@@ -14,6 +16,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
 app.use("/api/auth", authRoutes);
+app.use("/api/events", eventsRoutes);
+app.use("/api/bookings", bookingRoutes);
 
 connectDB();
 

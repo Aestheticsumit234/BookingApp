@@ -1,4 +1,5 @@
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 import OTP from "../models/otp.model.js";
 import User from "../models/user.model.js";
 import { sendOTPMail } from "../utils/mail.utils.js";
@@ -25,6 +26,8 @@ export const registerUser = async (req, res) => {
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
+    await OTP.deleteMany({ email, action: "account_verification" });
+
     await OTP.create({
       email,
       otp,
@@ -34,48 +37,94 @@ export const registerUser = async (req, res) => {
     await sendOTPMail(email, otp, "account_verification");
 
     res.status(201).json({
-      message: "User registered successfully please verify your account",
-      Email: user.email,
+      success: true,
+      message: "User registered successfully. Please verify your account.",
+      email: user.email,
     });
   } catch (error) {
-    console.log(`Internal Server Error Aaya bro`);
-    res.status(500).json({ message: "Internal Server Error Aaya bro" });
+    console.error("Register Error:", error);
+    res.status(500).json({ message: "Registration failed. Please try again." });
   }
 };
+
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
-
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
     const isPasswordMatch = await bcrypt.compare(password, user.password);
-
     if (!isPasswordMatch) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
     if (!user.isVerified && user.role === "user") {
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
-
-      await OTP.deleteMany({ email, action: "account_verification" }); // purna delete krne ke liye
-
-      await OTP.create({
-        email,
-        otp,
-        action: "account_verification",
-      });
+      await OTP.deleteMany({ email, action: "account_verification" });
+      await OTP.create({ email, otp, action: "account_verification" });
 
       await sendOTPMail(email, otp, "account_verification");
-      return res
-        .status(401)
-        .json({ message: "Account not verified. A new OTP has been sent" });
+
+      return res.status(403).json({
+        message: "Account not verified. A new OTP has been sent to your email.",
+      });
     }
 
-    res.status(200).json({ message: "Login successful", user });
-  } catch (error) {}
+    const token = jwt.sign(
+      { _id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" },
+    );
+
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 24 * 60 * 60 * 1000,
+    };
+
+    res
+      .status(200)
+      .cookie("token", token, cookieOptions)
+      .json({
+        success: true,
+        message: `Welcome back, ${user.name}`,
+        user: {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        },
+      });
+  } catch (error) {
+    console.error("Login Error:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
 };
-export const verifyOtp = async (req, res) => {};
+
+export const verifyOtp = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    const otpRecord = await OTP.findOne({
+      email,
+      otp,
+      action: "account_verification",
+    });
+
+    if (!otpRecord) {
+      return res.status(400).json({ message: "Invalid or expired OTP" });
+    }
+
+    await User.findOneAndUpdate({ email }, { isVerified: true });
+    await OTP.deleteOne({ _id: otpRecord._id });
+
+    res
+      .status(200)
+      .json({ success: true, message: "Account verified successfully!" });
+  } catch (error) {
+    res.status(500).json({ message: "Verification failed." });
+  }
+};
