@@ -1,6 +1,7 @@
 import Booking from "../models/bookings.model.js";
 import Event from "../models/event.model.js";
 import OTP from "../models/otp.model.js";
+import User from "../models/user.model.js";
 import { generateOTP } from "../utils/generateOTP.utils.js";
 import { sendBookingEmail, sendOTPMail } from "../utils/mail.utils.js";
 
@@ -86,6 +87,8 @@ export const confirmBookings = async (req, res) => {
       "email",
     );
 
+    const user = await User.findById(booking.userId._id);
+
     if (!booking) {
       return res.status(404).json({ message: "Booking not found" });
     }
@@ -110,7 +113,7 @@ export const confirmBookings = async (req, res) => {
     booking.status = "confirmed";
     await booking.save();
 
-    await sendBookingEmail(booking.userId.email, event.title, booking._id);
+    await sendBookingEmail(booking.userId.email, user.name, event.title);
 
     res.status(200).json({
       success: true,
