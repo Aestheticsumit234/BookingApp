@@ -153,7 +153,6 @@ export const updateEvent = async (req, res) => {
     });
   }
 };
-
 export const deleteEvent = async (req, res) => {
   try {
     const eventId = req.params.id;

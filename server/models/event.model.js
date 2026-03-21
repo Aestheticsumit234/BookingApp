@@ -46,7 +46,7 @@ const eventSchema = new mongoose.Schema(
     imageUrl: {
       type: String,
       required: true,
-      default: "https://via.placeholder.com/400x200?text=Venuly+Event",
+      default: "https://via.placeholder.com/400x200?text=Zion+Event",
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,

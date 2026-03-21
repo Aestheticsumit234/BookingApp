@@ -10,10 +10,6 @@ import { isAdmin, protect } from "../middlewares/auth.middleware.js";
 
 const eventRoutes = express.Router();
 
-console.log("Protect function:", typeof protect);
-console.log("IsAdmin function:", typeof isAdmin);
-console.log("CreateEvent function:", typeof createEvent);
-
 eventRoutes.get("/", getAllEvents);
 eventRoutes.get("/:id", getEventById);
 
