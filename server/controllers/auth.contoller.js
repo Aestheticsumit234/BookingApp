@@ -6,7 +6,7 @@ import { sendOTPMail } from "../utils/mail.utils.js";
 
 export const registerUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -20,7 +20,7 @@ export const registerUser = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      role: "user",
+      role,
       isVerified: false,
     });
 
@@ -126,5 +126,36 @@ export const verifyOtp = async (req, res) => {
       .json({ success: true, message: "Account verified successfully!" });
   } catch (error) {
     res.status(500).json({ message: "Verification failed." });
+  }
+};
+
+export const getUser = async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(404).json({
+        success: false,
+        message: "User context not found",
+      });
+    }
+
+    const { _id, name, email, role, isVerified, createdAt } = req.user;
+
+    res.status(200).json({
+      success: true,
+      user: {
+        id: _id,
+        name,
+        email,
+        role,
+        isVerified,
+        joinedAt: createdAt,
+      },
+    });
+  } catch (error) {
+    console.error("Get User Error:", error.message);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
   }
 };
