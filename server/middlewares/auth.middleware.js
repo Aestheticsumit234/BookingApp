@@ -8,7 +8,7 @@ export const protect = async (req, res, next) => {
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: "Unauthorized: Please login to access this resource",
+        message: "Unauthorized: Please login first",
       });
     }
 
@@ -19,23 +19,15 @@ export const protect = async (req, res, next) => {
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: "User no longer exists",
+        message: "User not found",
       });
     }
 
     req.user = user;
-
     next();
   } catch (error) {
-    console.error("Auth Middleware Error:", error.message);
-
-    if (error.name === "TokenExpiredError") {
-      return res
-        .status(401)
-        .json({ message: "Session expired, please login again" });
-    }
-
-    res.status(401).json({ message: "Invalid token, access denied" });
+    console.error("Protect Middleware Error:", error.message);
+    res.status(401).json({ success: false, message: "Invalid token" });
   }
 };
 
@@ -43,6 +35,9 @@ export const isAdmin = (req, res, next) => {
   if (req.user && req.user.role === "admin") {
     next();
   } else {
-    res.status(403).json({ message: "Access denied: Admins only" });
+    return res.status(403).json({
+      success: false,
+      message: "Access denied: Admins only",
+    });
   }
 };
