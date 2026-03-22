@@ -11,3 +11,126 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+.react-datepicker {
+  background-color: #0c0c0e !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  font-family: inherit !important;
+  border-radius: 12px !important;
+  box-shadow:
+    0 25px 50px -12px rgba(0, 0, 0, 0.8),
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset !important;
+  overflow: hidden;
+}
+
+/* 2. Header (Month & Year) */
+.react-datepicker__header {
+  background-color: #0c0c0e !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  padding: 16px 0 12px 0 !important;
+}
+
+.react-datepicker__current-month,
+.react-datepicker-time__header {
+  color: #ffffff !important;
+  font-size: 1.05rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.02em;
+}
+
+/* 3. Day Names (Mo, Tu, We...) */
+.react-datepicker__day-name {
+  color: #9ca3af !important;
+  font-weight: 700 !important;
+  font-size: 0.75rem !important;
+  margin: 0.25rem !important;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* 4. The Dates (1, 2, 3...) */
+.react-datepicker__day {
+  color: #ffffff !important;
+  font-weight: 500 !important;
+  border-radius: 8px !important;
+  margin: 0.2rem !important;
+  transition: all 0.2s ease;
+}
+
+.react-datepicker__day:hover {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  transform: scale(1.1);
+}
+
+/* 5. Selected Date (Indigo Glow) */
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected {
+  background-color: #4f46e5 !important;
+  color: #ffffff !important;
+  font-weight: bold !important;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.5) !important;
+  border: none !important;
+}
+
+/* 6. Time Picker Section */
+.react-datepicker__time-container {
+  border-left: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background-color: #0c0c0e !important;
+}
+
+.react-datepicker__time {
+  background-color: #0c0c0e !important;
+  color: #ffffff !important;
+}
+
+.react-datepicker-time__item {
+  color: #ffffff !important;
+  font-size: 0.85rem !important;
+  font-weight: 500 !important;
+  border-radius: 6px !important;
+  margin: 4px !important;
+  transition: all 0.2s ease;
+}
+
+.react-datepicker-time__item:hover {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.react-datepicker-time__item--selected {
+  background-color: #4f46e5 !important;
+  color: #ffffff !important;
+  font-weight: bold !important;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.4) !important;
+}
+
+/* 7. Navigation Arrows (Left/Right) */
+.react-datepicker__navigation-icon::before {
+  border-color: #ffffff !important;
+  border-width: 2px 2px 0 0 !important;
+  transition: all 0.2s ease;
+}
+
+.react-datepicker__navigation:hover *::before {
+  border-color: #4f46e5 !important;
+}
+
+/* 8. Hide Defaults */
+.react-datepicker__triangle {
+  display: none !important;
+}
+
+.react-datepicker__day--outside-month {
+  color: #3f3f46 !important;
+}
+
+/* 9. Hide Scrollbar from Time Picker */
+.react-datepicker__time-list {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.react-datepicker__time-list::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  background: transparent !important;
+}
