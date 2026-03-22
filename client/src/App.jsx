@@ -1,5 +1,70 @@
+import { useEffect } from "react";
+import { Route, Routes, useLocation } from "react-router-dom";
+import Footer from "./components/Footer";
+import Navbar from "./components/Navbar";
+import ProtectedRoute from "./components/ProtectedRoute";
+
+// Pages
+import AdminDashBoard from "./pages/AdminDashBoard";
+import EventDetails from "./pages/EventDetails";
+import Events from "./pages/Events";
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import PaymentFailed from "./pages/PaymentFailed";
+import PaymentSucess from "./pages/PaymentSucess";
+import Register from "./pages/Register";
+import UserDashboard from "./pages/UserDashboard";
+import VerifyAccount from "./pages/VerifyAccount.jsx";
+
 const App = () => {
-  return <div>App</div>;
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return (
+    <div className="bg-gray-900 min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white">
+      <Navbar />
+
+      <main className="grow">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/verify-account" element={<VerifyAccount />} />
+
+          <Route element={<ProtectedRoute />}>
+            <Route path="/events" element={<Events />} />
+            <Route path="/event/:id" element={<EventDetails />} />
+            <Route path="/dashboard" element={<UserDashboard />} />
+            <Route path="/payment-success" element={<PaymentSucess />} />
+            <Route path="/payment-failed" element={<PaymentFailed />} />
+          </Route>
+
+          <Route element={<ProtectedRoute adminOnly={true} />}>
+            <Route path="/admin" element={<AdminDashBoard />} />
+          </Route>
+
+          <Route
+            path="*"
+            element={
+              <div className="relative text-white text-center py-64  overflow-hidden">
+                <h1 className="flex flex-col items-center justify-center text-9xl font-black italic opacity-10 absolute left-1/2  -translate-x-1/2 -translate-y-1/2 w-full">
+                  <span>404</span>
+                  <span className="text-7xl uppercase mt-4">
+                    Page Not Found
+                  </span>
+                </h1>
+              </div>
+            }
+          />
+        </Routes>
+      </main>
+
+      <Footer />
+    </div>
+  );
 };
 
 export default App;

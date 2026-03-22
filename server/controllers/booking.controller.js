@@ -167,3 +167,24 @@ export const cancleBookings = async (req, res) => {
       .json({ message: "Error canceling booking", error: error.message });
   }
 };
+
+export const getAllBookingsForAdmin = async (req, res) => {
+  try {
+    const bookings = await Booking.find()
+      .populate("userId", "name email") // User ka naam aur email dikhane ke liye
+      .populate("eventId", "title date location ticketPrice") // Event ki info ke liye
+      .sort({ createdAt: -1 }); // Nayi bookings upar dikhengi
+
+    res.status(200).json({
+      success: true,
+      count: bookings.length,
+      bookings,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch all bookings for admin",
+      error: error.message,
+    });
+  }
+};
