@@ -7,6 +7,7 @@ import {
   FaUserCheck,
 } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
+import TrendingDrops from "../components/TrendingDrops";
 import { AuthContext } from "../context/authContext";
 
 const Home = () => {
@@ -19,7 +20,7 @@ const Home = () => {
 
   return (
     <div className="bg-[#09090b] min-h-screen text-zinc-100 font-sans selection:bg-indigo-500/30 selection:text-indigo-200">
-      <section className="relative pt-32 pb-24 px-6 lg:pt-24 lg:pb-32 overflow-hidden flex flex-col items-center justify-center text-center">
+      <section className="relative pt-32 pb-24 px-6 lg:pt-16 lg:pb-32 overflow-hidden flex flex-col items-center justify-center text-center">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-100 bg-indigo-600/20 blur-[120px] rounded-[100%] pointer-events-none -z-10" />
 
         <div className="inline-flex items-center gap-2 bg-zinc-900/80 border border-zinc-800 backdrop-blur-md px-5 py-2 rounded-full text-xs font-semibold text-zinc-300 mb-8 shadow-2xl">
@@ -68,7 +69,9 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="py-32 px-6 max-w-6xl mx-auto relative">
+      <TrendingDrops />
+
+      <section className="py-16 px-6 max-w-6xl mx-auto relative">
         <div className="text-center mb-20">
           <h2 className="text-3xl md:text-5xl font-black text-white mb-6 tracking-tight">
             How Zion Protects You
