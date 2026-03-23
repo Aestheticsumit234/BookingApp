@@ -94,20 +94,6 @@ const Events = () => {
                 key={event._id}
                 className="group bg-[#0d1117] border border-slate-800 rounded overflow-hidden hover:border-indigo-500/30 transition-all duration-300 relative"
               >
-                {user?.role === "admin" && (
-                  <div className="absolute top-3 right-3 z-20 flex gap-2">
-                    <button className="bg-black/50 backdrop-blur-md p-2 rounded-lg hover:text-indigo-400 transition-all">
-                      <FaEdit size={10} />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(event._id)}
-                      className="bg-black/50 backdrop-blur-md p-2 rounded-lg hover:text-red-500 transition-all"
-                    >
-                      <FaTrash size={10} />
-                    </button>
-                  </div>
-                )}
-
                 <div className="h-44 relative overflow-hidden">
                   <img
                     src={event.imageUrl}
@@ -144,12 +130,26 @@ const Events = () => {
                     <p className="text-2xl font-black text-white italic tracking-tighter">
                       ₹{event.ticketPrice}
                     </p>
-                    <Link
-                      to={`/event/${event._id}`}
-                      className="bg-white text-black hover:bg-indigo-600 hover:text-white px-5 py-2 rounded text-[9px] font-black uppercase tracking-widest transition-all"
-                    >
-                      Book Now
-                    </Link>
+                    {user?.role === "admin" ? (
+                      <div className="flex items-center gap-2">
+                        <button className="bg-black/50 backdrop-blur-md p-2 rounded-lg hover:text-indigo-400 transition-all cursor-pointer">
+                          <FaEdit size={15} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(event._id)}
+                          className="bg-black/50 backdrop-blur-md p-2 rounded-lg hover:text-red-500 transition-al cursor-pointer"
+                        >
+                          <FaTrash size={15} />
+                        </button>
+                      </div>
+                    ) : (
+                      <Link
+                        to={`/event/${event._id}`}
+                        className="bg-white text-black hover:bg-indigo-600 hover:text-white px-5 py-2 rounded text-[9px] font-black uppercase tracking-widest transition-all"
+                      >
+                        Book Now
+                      </Link>
+                    )}
                   </div>
                 </div>
               </div>

@@ -171,9 +171,9 @@ export const cancleBookings = async (req, res) => {
 export const getAllBookingsForAdmin = async (req, res) => {
   try {
     const bookings = await Booking.find()
-      .populate("userId", "name email") // User ka naam aur email dikhane ke liye
-      .populate("eventId", "title date location ticketPrice") // Event ki info ke liye
-      .sort({ createdAt: -1 }); // Nayi bookings upar dikhengi
+      .populate("userId", "name email")
+      .populate("eventId", "title date location ticketPrice")
+      .sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,

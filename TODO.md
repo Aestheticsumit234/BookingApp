@@ -44,3 +44,5 @@ Unique Selling Points that make the project stand out:
 - **Email Notifications:** Automated confirmation and reminder emails using **Nodemailer**.
 - **Real-time Updates:** Instant notifications via **Socket.io** if an event is cancelled or rescheduled.
 - **Ratings & Reviews:** A feedback system for users to rate and review events after they conclude.
+
+- ## Hamne abhi admin kw liye Bookings ka routes nhi kiya hai

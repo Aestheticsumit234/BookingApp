@@ -1,6 +1,7 @@
 import { useContext, useState } from "react";
-import { FaBars, FaTicketAlt, FaTimes, FaUserCircle } from "react-icons/fa";
+import { FaBars, FaTimes, FaUserCircle } from "react-icons/fa";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import logo from "../assets/logo.svg";
 import { AuthContext } from "../context/authContext";
 
 const Navbar = () => {
@@ -24,17 +25,14 @@ const Navbar = () => {
     <nav className="bg-gray-900 border-b border-gray-800 sticky top-0 z-50">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo Section */}
           <Link to="/" className="flex items-center gap-2 group">
-            <div className="bg-indigo-600 p-2 rounded-lg group-hover:bg-indigo-500 transition-colors">
-              <FaTicketAlt className="text-white text-xl" />
-            </div>
+            <img src={logo} alt="logo" className="w-8 h-8 rounded" />
+
             <span className="text-white text-2xl font-bold tracking-tight">
               Zion
             </span>
           </Link>
 
-          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             {navLinks.map((link) => (
               <Link
@@ -84,7 +82,6 @@ const Navbar = () => {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center">
             <button
               onClick={() => setIsOpen(!isOpen)}
@@ -96,7 +93,6 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile Menu */}
       {isOpen && (
         <div className="md:hidden bg-gray-900 border-t border-gray-800 animate-fade-in-down">
           <div className="px-4 pt-2 pb-6 space-y-2">
