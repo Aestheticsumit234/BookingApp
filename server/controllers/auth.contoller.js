@@ -2,7 +2,8 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import OTP from "../models/otp.model.js";
 import User from "../models/user.model.js";
-import { sendOTPMail } from "../utils/mail.utils.js";
+import { generateOTP } from "../utils/generateOTP.utils.js";
+import { sendForgetPasswordOTP, sendOTPMail } from "../utils/mail.utils.js";
 
 export const registerUser = async (req, res) => {
   try {
@@ -24,7 +25,7 @@ export const registerUser = async (req, res) => {
       isVerified: false,
     });
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otp = generateOTP();
 
     await OTP.deleteMany({ email, action: "account_verification" });
 
@@ -126,6 +127,66 @@ export const verifyOtp = async (req, res) => {
       .json({ success: true, message: "Account verified successfully!" });
   } catch (error) {
     res.status(500).json({ message: "Verification failed." });
+  }
+};
+
+export const forgetPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const otp = generateOTP();
+
+    await OTP.deleteMany({ email, action: "password_reset" });
+
+    await OTP.create({ email, otp, action: "password_reset" });
+
+    await sendForgetPasswordOTP(email, otp, "password_reset");
+
+    res.status(200).json({ success: true, message: "OTP sent successfully!" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Failed to send OTP" });
+  }
+};
+
+export const resetPassword = async (req, res) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+
+    const otpRecord = await OTP.findOne({
+      email,
+      otp,
+      action: "password_reset",
+    });
+
+    if (!otpRecord) {
+      return res.status(400).json({ message: "Invalid or expired OTP" });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    user.password = hashedPassword;
+    await user.save();
+
+    await OTP.deleteOne({ _id: otpRecord._id });
+
+    res
+      .status(200)
+      .json({ success: true, message: "Password reset successfully!" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to reset password" });
   }
 };
 

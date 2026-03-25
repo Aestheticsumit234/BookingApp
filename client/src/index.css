@@ -10,6 +10,36 @@ body {
     "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  user-select: none;
+}
+
+.zion-loader-text::after {
+  content: "";
+  position: absolute;
+  top: 55%;
+  left: -10%;
+  width: 0;
+  height: 6px;
+  background-color: #6366f1;
+  transform: translateY(-50%);
+  animation: lineCrossZ 2.5s cubic-bezier(0.65, 0.05, 0.36, 1) infinite;
+  border-radius: 4px;
+}
+
+@keyframes lineCrossZ {
+  0% {
+    width: 0;
+    left: -10%;
+  }
+  40%,
+  60% {
+    width: 120%;
+    left: -10%;
+  }
+  100% {
+    width: 0;
+    left: 110%;
+  }
 }
 
 .react-datepicker {

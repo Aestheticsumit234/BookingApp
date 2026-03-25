@@ -8,6 +8,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import AdminDashBoard from "./pages/AdminDashBoard";
 import EventDetails from "./pages/EventDetails";
 import Events from "./pages/Events";
+import ForgotPassword from "./pages/ForgotPassword.jsx";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import PaymentFailed from "./pages/PaymentFailed";
@@ -33,6 +34,7 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/verify-account" element={<VerifyAccount />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
 
           <Route element={<ProtectedRoute />}>
             <Route path="/events" element={<Events />} />

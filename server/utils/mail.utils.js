@@ -144,9 +144,93 @@ export const sendOTPMail = async (email, otp, type) => {
     };
 
     await transporter.sendMail(mailOptions);
-
     console.log(`OTP sent successfully to ${email} for ${type}`);
   } catch (error) {
     console.error(`Error sending email: ${error.message}!!`);
+    throw new Error(
+      "Could not send OTP email. Please check the email address.",
+    );
+  }
+};
+
+export const sendForgetPasswordOTP = async (email, otp, type) => {
+  try {
+    const isAccountVerify = type === "password_reset";
+
+    const title = isAccountVerify
+      ? " Reset your password"
+      : "password reset successfully!";
+    const bodyText = isAccountVerify
+      ? "Please use the following One-Time Password (OTP) to reset your password:"
+      : "Your password has been successfully reset:";
+
+    const htmlContent = `
+    <div style="background-color: #f4f7f9; padding:0 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased;">
+  <div style="max-width: 520px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.03);">
+    
+    <div style="height: 6px; background-color: #4F46E5;"></div>
+
+    <div style="padding: 40px;">
+      <div style="text-align: left; margin-bottom: 30px;">
+        <h1 style="color: #1a1a1a; margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.8px;">Zion Team,</h1>
+      </div>
+
+      <h2 style="color: #111827; margin: 0 0 16px 0; font-size: 20px; font-weight: 600; line-height: 1.3;">${title}</h2>
+      
+      <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin-bottom: 25px;">
+        Hello,<br><br>
+       ${bodyText}
+      </p>
+      
+      <div style="background-color: #190df777; border: 1px solid #e2e8f0; border-radius: 8px; padding: 24px; text-align: center; margin-bottom: 25px;">
+        <div style="font-family: 'SF Mono', 'Roboto Mono', Menlo, monospace; font-size: 36px; font-weight: 700; color: #1e293b; letter-spacing: 10px; margin-bottom: 8px;">
+          ${otp}
+        </div>
+        <p style="color: #fff; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; margin: 0;">
+          Code expires in 5 minutes
+        </p>
+      </div>
+
+      <p style="color: #4b5563; font-size: 14px; line-height: 1.6;">
+        For your security, do not share this code with anyone. Zion representatives will never ask for this password.
+      </p>
+
+      <div style="height: 1px; background-color: #f1f5f9; margin: 35px 0;"></div>
+      
+      <p style="color: #94a3b8; font-size: 13px; line-height: 1.5; margin: 0;">
+        Thank you,<br>
+        <strong>The Zion Security Team</strong>
+      </p>
+    </div>
+
+    <div style="padding: 24px 40px; background-color: #fafafa; border-top: 1px solid #f1f5f9; text-align: center;">
+      <p style="color: #94a3b8; font-size: 12px; margin: 0; line-height: 1.5;">
+        You received this because an account action was requested on Zion.<br>
+        If this wasn't you, please <a href="#" style="color: #4F46E5; text-decoration: none;">secure your account</a>.
+      </p>
+      <div style="margin-top: 15px;">
+        <a href="#" style="color: #cbd5e1; font-size: 11px; text-decoration: none; margin: 0 10px;">Privacy Policy</a>
+        <a href="#" style="color: #cbd5e1; font-size: 11px; text-decoration: none; margin: 0 10px;">Contact Support</a>
+      </div>
+    </div>
+  </div>
+</div>
+    `;
+
+    const mailOptions = {
+      from: `"Zion Team" <${process.env.USER_EMAIL}>`,
+      to: email,
+      subject: title,
+      text: `Your OTP for ${title} is ${otp}`,
+      html: htmlContent,
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log(`OTP sent successfully to ${email} for ${type}`);
+  } catch (error) {
+    console.error(`Error sending email: ${error.message}!!`);
+    throw new Error(
+      "Could not send OTP email. Please check the email address.",
+    );
   }
 };
