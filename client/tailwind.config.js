@@ -7,6 +7,11 @@ export default {
         zionPrimary: "#4F46E5",
       },
     },
+    build: {
+      modulePreload: {
+        polyfill: false,
+      },
+    },
   },
   plugins: [],
 };

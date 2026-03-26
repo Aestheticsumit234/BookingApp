@@ -19,12 +19,21 @@ const bookingSchema = new mongoose.Schema(
     },
     paymentStatus: {
       type: String,
-      enum: ["unpaid", "paid"],
+      enum: ["unpaid", "paid", "failed"],
       default: "unpaid",
     },
     amount: {
       type: Number,
       required: true,
+    },
+    razorpay_order_id: {
+      type: String,
+    },
+    razorpay_payment_id: {
+      type: String,
+    },
+    razorpay_signature: {
+      type: String,
     },
   },
   {

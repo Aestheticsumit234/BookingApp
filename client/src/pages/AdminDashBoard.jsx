@@ -10,13 +10,12 @@ import api from "../utils/axios";
 const AdminDashBoard = () => {
   const { user, logout } = useContext(AuthContext);
 
-  const [pendingBookings, setPendingBookings] = useState([]);
-  const [confirmedBookings, setConfirmedBookings] = useState([]);
+  const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
 
   const [stats, setStats] = useState({
-    totalBookings: 0,
+    totalSales: 0,
     confirmedCount: 0,
     totalRevenue: 0,
   });
@@ -26,25 +25,23 @@ const AdminDashBoard = () => {
       setLoading(true);
       const { data } = await api.get("/bookings/all-bookings");
       if (data.success) {
-        const pending = data.bookings.filter((b) => b.status === "pending");
-        const confirmed = data.bookings.filter((b) => b.status !== "pending");
+        const confirmed = data.bookings.filter((b) => b.status === "confirmed");
 
         const revenue = confirmed.reduce((total, booking) => {
           const price = booking.eventId?.ticketPrice || booking.amount || 0;
           return total + Number(price);
         }, 0);
 
-        setPendingBookings(pending);
-        setConfirmedBookings(confirmed);
+        setBookings(confirmed);
 
         setStats({
-          totalBookings: data.bookings.length,
+          totalSales: data.bookings.length,
           confirmedCount: confirmed.length,
           totalRevenue: revenue,
         });
       }
     } catch (err) {
-      toast.error("Sync failed");
+      toast.error("System Sync Failed");
     } finally {
       setLoading(false);
     }
@@ -57,10 +54,10 @@ const AdminDashBoard = () => {
   const handleConfirm = async (id) => {
     try {
       await api.put(`/bookings/${id}/confirm`, { paymentStatus: "paid" });
-      toast.success("Verified and Approved");
+      toast.success("Manual Override: Access Granted");
       fetchAllData();
     } catch (err) {
-      toast.error("Error confirming pass");
+      toast.error("Override Failed");
     }
   };
 
@@ -77,7 +74,12 @@ const AdminDashBoard = () => {
             </h2>
           </div>
           <div className="flex items-center gap-4">
-            <p className="text-sm font-bold hidden md:block">{user?.name}</p>
+            <div className="text-right hidden md:block">
+              <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">
+                Administrator
+              </p>
+              <p className="text-sm font-black text-white">{user?.name}</p>
+            </div>
             <button
               onClick={logout}
               className="p-3 bg-slate-800 rounded hover:text-red-500 border border-slate-700 transition-all cursor-pointer"
@@ -89,18 +91,20 @@ const AdminDashBoard = () => {
 
         <AdminStats stats={stats} />
 
-        <div className="mb-8 flex justify-end mt-4">
+        <div className="mb-8 flex justify-between items-center mt-8">
+          <h3 className="text-xs font-black uppercase tracking-[0.3em] text-indigo-500">
+            Live Transaction Logs
+          </h3>
           <button
             onClick={() => setShowModal(true)}
-            className="bg-indigo-600 px-6 py-3 rounded font-bold text-xs flex items-center gap-2 hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-500/10 active:scale-95 cursor-pointer"
+            className="bg-indigo-600 px-6 py-3 rounded font-bold text-[10px] flex items-center gap-2 hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-500/10 active:scale-95 cursor-pointer uppercase tracking-widest"
           >
-            <FaPlus /> NEW EVENT
+            <FaPlus /> Deploy New Event
           </button>
         </div>
 
         <BookingTable
-          pendingBookings={pendingBookings}
-          confirmedBookings={confirmedBookings}
+          bookings={bookings}
           loading={loading}
           onConfirm={handleConfirm}
         />

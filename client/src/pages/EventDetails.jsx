@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
-import { FaArrowLeft, FaFingerprint } from "react-icons/fa";
+import { FaArrowLeft } from "react-icons/fa";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../utils/axios";
 
@@ -9,8 +9,6 @@ const EventDetails = () => {
   const navigate = useNavigate();
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [showOtpModal, setShowOtpModal] = useState(false);
-  const [otp, setOtp] = useState("");
   const [bookingLoading, setBookingLoading] = useState(false);
 
   useEffect(() => {
@@ -27,31 +25,64 @@ const EventDetails = () => {
     fetchEvent();
   }, [id]);
 
-  const handleBookingRequest = async () => {
-    setBookingLoading(true);
-    try {
-      await api.post("/bookings/send-otp");
-      setShowOtpModal(true);
-      toast.success("Security Code Dispatched");
-    } catch (err) {
-      toast.error("Relay Failure");
-    } finally {
-      setBookingLoading(false);
+  const handlePayment = async () => {
+    if (!window.Razorpay) {
+      return toast.error("Razorpay SDK failed to load. Check your connection.");
     }
-  };
 
-  const handleConfirmBooking = async (e) => {
-    e.preventDefault();
     setBookingLoading(true);
     try {
-      const { data } = await api.post("/bookings", { eventId: id, otp });
-      if (data.success) {
-        toast.success("Access Pending Approval");
-        navigate("/dashboard");
-      }
+      const { data } = await api.post("/payments/create-order", {
+        eventId: id,
+      });
+
+      const { order } = data;
+      const userData = JSON.parse(localStorage.getItem("user"));
+
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: order.amount,
+        currency: order.currency,
+        name: "ZION PROTOCOL",
+        description: `Access Pass: ${event.title}`,
+        order_id: order.id,
+        handler: async function (response) {
+          try {
+            const verifyRes = await api.post("/payments/verify", response);
+            if (verifyRes.data.success) {
+              toast.success("ACCESS GRANTED • SYNCING VAULT", {
+                style: {
+                  background: "#10b981",
+                  color: "#fff",
+                  fontSize: "10px",
+                  fontWeight: "bold",
+                },
+              });
+              navigate("/dashboard");
+            }
+          } catch (err) {
+            toast.error("SECURITY BREACH: Verification Failed");
+          }
+        },
+        prefill: {
+          name: userData?.name || "Agent",
+          email: userData?.email || "",
+        },
+        theme: { color: "#6366f1" },
+        modal: {
+          ondismiss: function () {
+            setBookingLoading(false);
+            toast.error("Protocol: Transaction Aborted", {
+              style: { background: "#ef4444", color: "#fff", fontSize: "10px" },
+            });
+          },
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
     } catch (err) {
-      toast.error("Invalid Cipher");
-    } finally {
+      toast.error(err.response?.data?.message || "Relay Failure");
       setBookingLoading(false);
     }
   };
@@ -68,15 +99,15 @@ const EventDetails = () => {
       <div className="relative h-112.5 w-full bg-black overflow-hidden">
         <img
           src={event.imageUrl}
-          className="w-full h-full object-cover opacity-40  transition-all duration-1000  hover:opacity-60"
+          className="w-full h-full object-cover opacity-40 transition-all duration-1000 hover:opacity-60"
           alt="hero"
         />
         <div className="absolute inset-0 bg-linear-to-t from-[#080808] via-transparent to-transparent"></div>
 
-        <div className="absolute bottom-12 flex flex-col  md:gap-36 left-3 md:left-24 max-w-4xl">
+        <div className="absolute bottom-12 flex flex-col md:gap-36 left-3 md:left-24 max-w-4xl">
           <button
             onClick={() => navigate(-1)}
-            className="text-[10px] font-bold hidden uppercase tracking-[0.4em] text-indigo-500 mb-8 sm:flex items-center gap-2 hover:text-white transition-all"
+            className="text-[10px] font-bold uppercase tracking-[0.4em] text-indigo-500 mb-8 flex items-center gap-2 hover:text-white transition-all"
           >
             <FaArrowLeft size={10} /> Back to Circuit
           </button>
@@ -127,14 +158,14 @@ const EventDetails = () => {
             </div>
 
             <button
-              onClick={handleBookingRequest}
+              onClick={handlePayment}
               disabled={event.availableSeats < 1 || bookingLoading}
               className="w-full bg-white text-black py-5 font-black uppercase tracking-[0.3em] text-[10px] hover:bg-indigo-600 hover:text-white transition-all duration-500 disabled:opacity-10"
             >
               {event.availableSeats < 1
                 ? "EXHAUSTED"
                 : bookingLoading
-                  ? "PROCESSING..."
+                  ? "INITIALIZING..."
                   : "SECURE PASS"}
             </button>
 
@@ -146,47 +177,6 @@ const EventDetails = () => {
           </div>
         </div>
       </div>
-
-      {showOtpModal && (
-        <div className="fixed inset-0 bg-black/98 backdrop-blur-3xl z-100 flex items-center justify-center p-6">
-          <div className="max-w-md w-full text-center">
-            <FaFingerprint className="text-indigo-600 text-4xl mx-auto mb-8 animate-pulse" />
-            <h2 className="text-2xl font-black text-white uppercase tracking-widest mb-2 italic">
-              Verify Identity
-            </h2>
-            <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.3em] mb-12">
-              Cipher sent to registered email
-            </p>
-
-            <form onSubmit={handleConfirmBooking} className="space-y-12">
-              <input
-                type="text"
-                maxLength="6"
-                required
-                autoFocus
-                className="w-full bg-transparent border-b border-white/10 text-white text-6xl font-black tracking-[0.5em] text-center outline-none focus:border-white transition-all pb-6"
-                placeholder="000000"
-                onChange={(e) => setOtp(e.target.value)}
-              />
-              <div className="flex flex-col gap-6">
-                <button
-                  type="submit"
-                  className="w-full bg-white text-black py-5 font-black uppercase text-[10px] tracking-[0.3em] hover:bg-indigo-600 hover:text-white transition-all"
-                >
-                  Confirm Reservation
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowOtpModal(false)}
-                  className="text-[9px] font-black text-white/20 uppercase tracking-widest hover:text-white transition-colors"
-                >
-                  Abort
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

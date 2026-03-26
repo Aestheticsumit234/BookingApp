@@ -107,7 +107,7 @@ const Events = () => {
                 </div>
 
                 <div className="p-6">
-                  <h3 className="text-xl font-black text-white uppercase italic tracking-tighter mb-4 truncate">
+                  <h3 className="text-xl  text-white uppercase italic tracking-tighter mb-4 truncate">
                     {event.title}
                   </h3>
 
@@ -127,8 +127,8 @@ const Events = () => {
                   </div>
 
                   <div className="flex items-center justify-between pt-4 border-t border-slate-800/50">
-                    <p className="text-2xl font-black text-white italic tracking-tighter">
-                      ₹{event.ticketPrice}
+                    <p className="text-2xl  text-white italic tracking-tighter">
+                      {event.ticketPrice ? `₹ ${event.ticketPrice}` : "FREE"}
                     </p>
                     {user?.role === "admin" ? (
                       <div className="flex items-center gap-2">

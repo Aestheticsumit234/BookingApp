@@ -3,7 +3,7 @@ import Cookies from "js-cookie";
 import { toast } from "react-hot-toast";
 
 const api = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api",
   headers: {
     "Content-Type": "application/json",
   },
@@ -31,7 +31,6 @@ api.interceptors.response.use(
       error.response.status === 401 &&
       originalRequest.url !== "/auth/me"
     ) {
-      // Clean local state
       Cookies.remove("token");
       localStorage.removeItem("user");
 
@@ -39,14 +38,15 @@ api.interceptors.response.use(
         const path = window.location.pathname;
 
         if (!["/login", "/register", "/"].includes(path)) {
-          toast.error("Session expired. Please login again.");
+          toast.error("SYSTEM: Session Expired. Re-authenticating...");
           window.location.href = "/login";
         }
       }
     }
 
+    // 🔥 Server Overload: 500+ Errors
     if (error.response && error.response.status >= 500) {
-      toast.error("Zion Server Error. Please try again later.");
+      toast.error("ZION: Protocol Failure (Server Error)");
     }
 
     return Promise.reject(error);
