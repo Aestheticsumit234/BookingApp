@@ -1,21 +1,29 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { FaArrowLeft } from "react-icons/fa";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import api from "../utils/axios";
 
 const EventDetails = () => {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [bookingLoading, setBookingLoading] = useState(false);
-
   useEffect(() => {
     const fetchEvent = async () => {
       try {
+        setLoading(true);
         const { data } = await api.get(`/events/${id}`);
         setEvent(data.event);
+
+        const shouldBook = searchParams.get("book");
+        if (shouldBook === "true" && data.event.availableSeats > 0) {
+          setTimeout(() => {
+            handlePayment(data.event);
+          }, 800);
+        }
       } catch (err) {
         toast.error("System: Asset not found");
       } finally {
@@ -23,9 +31,10 @@ const EventDetails = () => {
       }
     };
     fetchEvent();
-  }, [id]);
+  }, [id, searchParams]);
+  const handlePayment = async (directEvent = null) => {
+    const currentEvent = directEvent || event;
 
-  const handlePayment = async () => {
     if (!window.Razorpay) {
       return toast.error("Razorpay SDK failed to load. Check your connection.");
     }
@@ -44,7 +53,7 @@ const EventDetails = () => {
         amount: order.amount,
         currency: order.currency,
         name: "ZION PROTOCOL",
-        description: `Access Pass: ${event.title}`,
+        description: `Access Pass: ${currentEvent.title}`,
         order_id: order.id,
         handler: async function (response) {
           try {
@@ -96,6 +105,7 @@ const EventDetails = () => {
 
   return (
     <div className="min-h-screen bg-[#080808] text-[#a0a0a0] font-sans selection:bg-white selection:text-black pb-20">
+      {/* ... poora return block same rahega ... */}
       <div className="relative h-112.5 w-full bg-black overflow-hidden">
         <img
           src={event.imageUrl}
@@ -103,7 +113,6 @@ const EventDetails = () => {
           alt="hero"
         />
         <div className="absolute inset-0 bg-linear-to-t from-[#080808] via-transparent to-transparent"></div>
-
         <div className="absolute bottom-12 flex flex-col md:gap-36 left-3 md:left-24 max-w-4xl">
           <button
             onClick={() => navigate(-1)}
@@ -132,7 +141,6 @@ const EventDetails = () => {
               "{event.description}"
             </p>
           </section>
-
           <div className="grid grid-cols-2 md:grid-cols-3 gap-y-10 border-t border-white/5 pt-10">
             <Spec label="Venue" value={event.location} />
             <Spec
@@ -156,9 +164,8 @@ const EventDetails = () => {
                 ₹{event.ticketPrice}
               </h3>
             </div>
-
             <button
-              onClick={handlePayment}
+              onClick={() => handlePayment()}
               disabled={event.availableSeats < 1 || bookingLoading}
               className="w-full bg-white text-black py-5 font-black uppercase tracking-[0.3em] text-[10px] hover:bg-indigo-600 hover:text-white transition-all duration-500 disabled:opacity-10"
             >
@@ -168,7 +175,6 @@ const EventDetails = () => {
                   ? "INITIALIZING..."
                   : "SECURE PASS"}
             </button>
-
             <div className="mt-8 pt-8 border-t border-white/5">
               <p className="text-[8px] font-bold text-white/20 uppercase tracking-[0.2em] flex items-center justify-between">
                 Protocol: <span>ZION-v2-AUTH</span>

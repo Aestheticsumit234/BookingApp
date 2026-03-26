@@ -126,7 +126,6 @@ const TrendingDrops = () => {
                     </div>
                   </div>
 
-                  {/* Footer */}
                   <div className="mt-auto pt-5 border-t border-zinc-800/80 flex items-center justify-between">
                     <div>
                       <p
@@ -137,10 +136,9 @@ const TrendingDrops = () => {
                           : "FREE"}
                       </p>
                     </div>
-
                     <button
                       onClick={() =>
-                        handleProtectedClick(`/event/${event._id}`)
+                        handleProtectedClick(`/event/${event._id}?book=true`)
                       }
                       disabled={isSoldOut}
                       className={`px-4 py-2 rounded text-[10px] font-bold uppercase tracking-widest transition-all ${
