@@ -1,8 +1,6 @@
 import { createContext, useEffect, useState } from "react";
 import api from "../utils/axios";
 export const AuthContext = createContext();
-
-// 2. Provider Component (Named Export)
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
     try {
@@ -27,13 +25,16 @@ export const AuthProvider = ({ children }) => {
       }
 
       try {
-        const { data } = await api.get("/auth/me");
+        const { data } = await api.get("/auth/me", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         if (data.success) {
           setUser(data.user);
           localStorage.setItem("user", JSON.stringify(data.user));
         }
       } catch (error) {
-        // Agar token invalid hai toh clear karo
         if (error.response?.status === 401) {
           localStorage.removeItem("user");
           localStorage.removeItem("token");
@@ -94,8 +95,17 @@ export const AuthProvider = ({ children }) => {
   };
 
   const verifyOTP = async (email, otp) => {
-    const { data } = await api.post("/auth/verify-otp", { email, otp });
-    return data;
+    try {
+      const { data } = await api.post("/auth/verify-otp", { email, otp });
+      if (data.success) {
+        localStorage.setItem("user", JSON.stringify(data.user));
+        localStorage.setItem("token", data.token);
+        setUser(data.user);
+      }
+      return data;
+    } catch (error) {
+      throw error;
+    }
   };
 
   const registerUser = async (userData) => {
