@@ -120,13 +120,42 @@ export const verifyOtp = async (req, res) => {
       return res.status(400).json({ message: "Invalid or expired OTP" });
     }
 
-    await User.findOneAndUpdate({ email }, { isVerified: true });
+    const user = await User.findOneAndUpdate(
+      { email },
+      { isVerified: true },
+      { new: true },
+    );
+
     await OTP.deleteOne({ _id: otpRecord._id });
+
+    const token = jwt.sign(
+      { _id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" },
+    );
+
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 24 * 60 * 60 * 1000,
+    };
 
     res
       .status(200)
-      .json({ success: true, message: "Account verified successfully!" });
+      .cookie("token", token, cookieOptions)
+      .json({
+        success: true,
+        message: "Account verified successfully!",
+        user: {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        },
+      });
   } catch (error) {
+    console.error("Verification error:", error);
     res.status(500).json({ message: "Verification failed." });
   }
 };
