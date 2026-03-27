@@ -20,6 +20,7 @@ app.use(
     origin: [
       "http://localhost:5173",
       "https://booking-app-theta-ashen.vercel.app",
+      "https://zionevents.vercel.app",
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
