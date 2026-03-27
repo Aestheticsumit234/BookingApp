@@ -12,7 +12,7 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    const token = Cookies.get("token");
+    const token = localStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -33,6 +33,7 @@ api.interceptors.response.use(
     ) {
       Cookies.remove("token");
       localStorage.removeItem("user");
+      localStorage.removeItem("token");
 
       if (typeof window !== "undefined") {
         const path = window.location.pathname;
@@ -44,7 +45,6 @@ api.interceptors.response.use(
       }
     }
 
-    // 🔥 Server Overload: 500+ Errors
     if (error.response && error.response.status >= 500) {
       toast.error("ZION: Protocol Failure (Server Error)");
     }

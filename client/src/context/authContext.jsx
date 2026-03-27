@@ -1,26 +1,44 @@
 import { createContext, useEffect, useState } from "react";
 import api from "../utils/axios";
-
 export const AuthContext = createContext();
 
+// 2. Provider Component (Named Export)
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem("user");
+      return savedUser ? JSON.parse(savedUser) : null;
+    } catch {
+      return null;
+    }
+  });
+
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0);
-  const [showApp, setShowApp] = useState(false);
+
   useEffect(() => {
     const checkUserStatus = async () => {
+      const token = localStorage.getItem("token");
+      const storedUser = localStorage.getItem("user");
+
+      if (!token || !storedUser) {
+        setLoading(false);
+        return;
+      }
+
       try {
-        const storedUser = localStorage.getItem("user");
-        if (storedUser) {
-          const { data } = await api.get("/auth/me");
-          if (data.success) {
-            setUser(data.user);
-          }
+        const { data } = await api.get("/auth/me");
+        if (data.success) {
+          setUser(data.user);
+          localStorage.setItem("user", JSON.stringify(data.user));
         }
       } catch (error) {
-        localStorage.removeItem("user");
-        setUser(null);
+        // Agar token invalid hai toh clear karo
+        if (error.response?.status === 401) {
+          localStorage.removeItem("user");
+          localStorage.removeItem("token");
+          setUser(null);
+        }
       } finally {
         setLoading(false);
       }
@@ -33,20 +51,11 @@ export const AuthProvider = ({ children }) => {
       setProgress((prev) => {
         if (prev >= 100) {
           clearInterval(timer);
-          setTimeout(() => setShowApp(true), 400);
           return 100;
         }
-
-        let increment = 0;
-        if (loading) {
-          increment = prev < 70 ? 0.8 : 0.2;
-        } else {
-          increment = 4;
-        }
-        return prev + increment;
+        return prev + (loading ? (prev < 80 ? 1 : 0.2) : 5);
       });
     }, 20);
-
     return () => clearInterval(timer);
   }, [loading]);
 
@@ -54,8 +63,9 @@ export const AuthProvider = ({ children }) => {
     try {
       const { data } = await api.post("/auth/login", { email, password });
       if (data.success) {
-        setUser(data.user);
         localStorage.setItem("user", JSON.stringify(data.user));
+        localStorage.setItem("token", data.token);
+        setUser(data.user);
       }
       return data;
     } catch (error) {
@@ -70,33 +80,26 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const verifyOTP = async (email, otp) => {
-    try {
-      const { data } = await api.post("/auth/verify-otp", { email, otp });
-      return data;
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  const registerUser = async (userData) => {
-    try {
-      const { data } = await api.post("/auth/register", userData);
-      return data;
-    } catch (error) {
-      throw error;
-    }
-  };
-
   const logout = async () => {
     try {
       await api.post("/auth/logout");
-    } catch (error) {
-      console.error("Logout API Error:", error);
+    } catch (err) {
+      console.error("Logout error", err);
     } finally {
-      setUser(null);
       localStorage.removeItem("user");
+      localStorage.removeItem("token");
+      setUser(null);
     }
+  };
+
+  const verifyOTP = async (email, otp) => {
+    const { data } = await api.post("/auth/verify-otp", { email, otp });
+    return data;
+  };
+
+  const registerUser = async (userData) => {
+    const { data } = await api.post("/auth/register", userData);
+    return data;
   };
 
   return (
@@ -107,27 +110,15 @@ export const AuthProvider = ({ children }) => {
         children
       ) : (
         <div className="fixed inset-0 bg-gray-900 flex flex-col items-center justify-center z-9999">
-          <div className="w-full max-w-70 flex flex-col items-center">
-            <div className="relative mb-12">
-              <h1 className="zion-loader-text text-white italic font-black text-8xl tracking-tighter">
-                Z<span className="text-indigo-500">.</span>
-              </h1>
-            </div>
-
+          <div className="w-full max-w-70 flex flex-col items-center px-10">
+            <h1 className="text-white italic font-black text-8xl tracking-tighter mb-12">
+              Z<span className="text-indigo-500">.</span>
+            </h1>
             <div className="w-full h-1 bg-gray-800 rounded-full overflow-hidden relative">
               <div
-                className="h-full bg-indigo-500 transition-all duration-200 ease-out shadow-[0_0_10px_rgba(99,102,241,0.5)]"
+                className="h-full bg-indigo-500 transition-all duration-200 shadow-[0_0_15px_rgba(99,102,241,0.6)]"
                 style={{ width: `${progress}%` }}
               ></div>
-            </div>
-
-            <div className="mt-6 flex flex-col items-center gap-1">
-              <span className="text-gray-400 text-sm font-semibold tracking-widest uppercase">
-                Zion Workspace
-              </span>
-              <span className="text-gray-600 text-[10px] tracking-tight">
-                Initializing secure session...
-              </span>
             </div>
           </div>
         </div>
