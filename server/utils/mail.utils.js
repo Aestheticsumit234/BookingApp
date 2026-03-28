@@ -4,14 +4,13 @@ import nodemailer from "nodemailer";
 dotenv.config();
 
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
+  host: "smtp.resend.com",
+  secure: true,
+  port: 465,
   auth: {
-    user: process.env.USER_EMAIL,
-    pass: process.env.USER_PASSWORD,
+    user: "resend", // This is literally the string "resend"
+    pass: process.env.RESEND_API_KEY, // Your actual API key
   },
-  family: 4,
 });
 export const sendBookingEmail = async (userMail, userName, eventTitle) => {
   try {
