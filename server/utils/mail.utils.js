@@ -4,14 +4,14 @@ import nodemailer from "nodemailer";
 dotenv.config();
 
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
+  host: "gmail",
   auth: {
     user: process.env.USER_EMAIL,
     pass: process.env.USER_PASSWORD,
   },
-  family: 4,
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 10000,
 });
 export const sendBookingEmail = async (userMail, userName, eventTitle) => {
   try {
@@ -73,7 +73,6 @@ export const sendBookingEmail = async (userMail, userName, eventTitle) => {
 export const sendOTPMail = async (email, otp, type) => {
   try {
     const isAccountVerify = type === "account_verification";
-
     const title = isAccountVerify
       ? "Verify your account"
       : "Confirm your Booking";
