@@ -22,12 +22,12 @@ const corsOptions = {
     "https://zionevents.vercel.app",
   ],
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // 🔥 FIX 2: OPTIONS added
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
 
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
+app.options(/.*/, cors(corsOptions));
 app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
