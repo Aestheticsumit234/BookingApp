@@ -57,6 +57,7 @@ const EventDetails = () => {
         order_id: order.id,
         handler: async function (response) {
           try {
+            setBookingLoading(true);
             const verifyRes = await api.post("/payments/verify", response);
             if (verifyRes.data.success) {
               toast.success("ACCESS GRANTED • SYNCING VAULT", {
@@ -67,10 +68,14 @@ const EventDetails = () => {
                   fontWeight: "bold",
                 },
               });
-              navigate("/dashboard");
+              setTimeout(() => {
+                navigate("/dashboard");
+              }, 1000);
             }
           } catch (err) {
             toast.error("SECURITY BREACH: Verification Failed");
+          } finally {
+            setBookingLoading(false);
           }
         },
         prefill: {

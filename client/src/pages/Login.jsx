@@ -20,11 +20,13 @@ const Login = () => {
 
       if (result.success) {
         toast.success("Authentication successful");
-        if (result.user.role === "admin") {
-          navigate("/admin");
-        } else {
-          navigate("/dashboard");
-        }
+        setTimeout(() => {
+          if (result.user.role === "admin") {
+            navigate("/admin");
+          } else {
+            navigate("/dashboard");
+          }
+        }, 600);
       }
 
       if (result.unverified) {

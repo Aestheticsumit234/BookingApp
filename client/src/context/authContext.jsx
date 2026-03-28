@@ -1,6 +1,8 @@
 import { createContext, useEffect, useState } from "react";
 import api from "../utils/axios";
+
 export const AuthContext = createContext();
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
     try {
@@ -25,11 +27,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       try {
-        const { data } = await api.get("/auth/me", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const { data } = await api.get("/auth/me");
         if (data.success) {
           setUser(data.user);
           localStorage.setItem("user", JSON.stringify(data.user));
@@ -63,7 +61,6 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const { data } = await api.post("/auth/login", { email, password });
-      console.log("Login Response Data:", data);
       if (data.success) {
         localStorage.setItem("user", JSON.stringify(data.user));
         localStorage.setItem("token", data.token);
@@ -82,6 +79,35 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const registerUser = async (userData) => {
+    try {
+      setLoading(true);
+      const { data } = await api.post("/auth/register", userData);
+      setLoading(false);
+      return data;
+    } catch (error) {
+      setLoading(false);
+      throw error;
+    }
+  };
+
+  const verifyOTP = async (email, otp) => {
+    try {
+      setLoading(true);
+      const { data } = await api.post("/auth/verify-otp", { email, otp });
+      if (data.success) {
+        localStorage.setItem("user", JSON.stringify(data.user));
+        localStorage.setItem("token", data.token);
+        setUser(data.user);
+      }
+      setLoading(false);
+      return data;
+    } catch (error) {
+      setLoading(false);
+      throw error;
+    }
+  };
+
   const logout = async () => {
     try {
       await api.post("/auth/logout");
@@ -94,28 +120,17 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const verifyOTP = async (email, otp) => {
-    try {
-      const { data } = await api.post("/auth/verify-otp", { email, otp });
-      if (data.success) {
-        localStorage.setItem("user", JSON.stringify(data.user));
-        localStorage.setItem("token", data.token);
-        setUser(data.user);
-      }
-      return data;
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  const registerUser = async (userData) => {
-    const { data } = await api.post("/auth/register", userData);
-    return data;
-  };
-
   return (
     <AuthContext.Provider
-      value={{ user, login, logout, verifyOTP, loading, registerUser }}
+      value={{
+        user,
+        login,
+        logout,
+        verifyOTP,
+        loading,
+        registerUser,
+        progress,
+      }}
     >
       {!loading ? (
         children
@@ -131,6 +146,9 @@ export const AuthProvider = ({ children }) => {
                 style={{ width: `${progress}%` }}
               ></div>
             </div>
+            <p className="text-white/40 text-[10px] uppercase tracking-widest mt-6 animate-pulse">
+              Synchronizing Vault...
+            </p>
           </div>
         </div>
       )}
