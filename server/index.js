@@ -15,18 +15,19 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(
-  cors({
-    origin: [
-      "http://localhost:5173",
-      "https://booking-app-theta-ashen.vercel.app",
-      "https://zionevents.vercel.app",
-    ],
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  }),
-);
+const corsOptions = {
+  origin: [
+    "http://localhost:5173",
+    "https://booking-app-theta-ashen.vercel.app",
+    "https://zionevents.vercel.app",
+  ],
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // 🔥 FIX 2: OPTIONS added
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
