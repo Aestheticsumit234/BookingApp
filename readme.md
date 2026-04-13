@@ -131,3 +131,11 @@ cd zion
 - Email: sumitkumarsharma2748@gmail.com
 - LinkedIn: https://www.linkedin.com/in/ssumitsharma1/
 - GitHub: https://github.com/Aestheticsumit234
+
+## Future Enhancements
+
+- Single-device login for better session control and account security
+- Advanced rate limiting and abuse prevention for sensitive APIs
+- Booking confirmation emails and downloadable tickets
+- Admin analytics dashboard
+- Refund and cancellation workflow
